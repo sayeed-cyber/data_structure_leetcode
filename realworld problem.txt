@@ -1,0 +1,178 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+// Define structures for priority queue (min-heap) node and hash table entry
+typedef struct PriorityQueueNode {
+char task[50];
+int priority;
+} PriorityQueueNode;
+typedef struct HashTableEntry {
+char task[50];
+int priority;
+struct HashTableEntry* next;
+} HashTableEntry;
+// Define structure for priority queue
+typedef struct {
+PriorityQueueNode* heap;
+int size;
+int capacity;
+} PriorityQueue;
+// Define structure for hash table
+typedef struct {
+HashTableEntry* table[10]; // Using a simple hash table with 10 slots for demonstration
+} HashTable;
+// Function prototypes
+PriorityQueue* initializePriorityQueue(int capacity);
+void enqueue(PriorityQueue* priorityQueue, char task[], int priority);
+void heapifyUp(PriorityQueue* priorityQueue, int index);
+void dequeue(PriorityQueue* priorityQueue);
+HashTable* initializeHashTable();
+void addTaskToHashTable(HashTable* hashTable, char task[], int priority);
+void updatePriorityInHashTable(HashTable* hashTable, char task[], int newPriority);
+void displayTasksHashTable(HashTable* hashTable);
+int main() {
+PriorityQueue* taskPriorityQueue = initializePriorityQueue(10);
+HashTable* taskHashTable = initializeHashTable();
+int choice;
+char task[50];
+int priority, newPriority;
+do {
+printf("\nTask Management System Menu\n");
+printf("1. Add a task\n");
+printf("2. Update task priority\n");
+printf("3. Display tasks (hash table)\n");
+printf("0. Exit\n");
+printf("Enter your choice: ");
+scanf("%d", &choice);
+switch (choice) {
+case 1:
+printf("Enter the task: ");
+scanf(" %[^\n]", task);
+printf("Enter the priority of the task: ");
+scanf("%d", &priority);
+enqueue(taskPriorityQueue, task, priority);
+addTaskToHashTable(taskHashTable, task, priority);
+break;
+case 2:
+printf("Enter the task to update priority: ");
+scanf(" %[^\n]", task);
+printf("Enter the new priority of the task: ");
+scanf("%d", &newPriority);
+updatePriorityInHashTable(taskHashTable, task, newPriority);
+break;
+case 3:
+printf("Tasks in hash table:\n");
+displayTasksHashTable(taskHashTable);
+break;
+case 0:
+printf("Exiting the program. Goodbye!\n");
+break;
+default:
+printf("Invalid choice. Please try again.\n");
+}
+} while (choice != 0);
+free(taskPriorityQueue->heap);
+free(taskPriorityQueue);
+return 0;
+}
+PriorityQueue* initializePriorityQueue(int capacity) {
+PriorityQueue* priorityQueue = (PriorityQueue*)malloc(sizeof(PriorityQueue));
+priorityQueue->heap = (PriorityQueueNode*)malloc(capacity * sizeof(PriorityQueueNode));
+priorityQueue->size = 0;
+priorityQueue->capacity = capacity;
+return priorityQueue;
+}
+void enqueue(PriorityQueue* priorityQueue, char task[], int priority) {
+if (priorityQueue->size < priorityQueue->capacity) {
+priorityQueue->heap[priorityQueue->size].priority = priority;
+strcpy(priorityQueue->heap[priorityQueue->size].task, task);
+heapifyUp(priorityQueue, priorityQueue->size++);
+printf("Task added to priority queue.\n");
+} else {
+printf("Priority queue is full. Cannot add more tasks.\n");
+}
+}
+void heapifyUp(PriorityQueue* priorityQueue, int index) {
+int parent = (index - 1) / 2;
+while (index > 0 && priorityQueue->heap[index].priority <
+priorityQueue->heap[parent].priority) {
+// Swap nodes if child has higher priority than the parent
+PriorityQueueNode temp = priorityQueue->heap[index];
+priorityQueue->heap[index] = priorityQueue->heap[parent];
+priorityQueue->heap[parent] = temp;
+index = parent;
+parent = (index - 1) / 2;
+}
+}
+void dequeue(PriorityQueue* priorityQueue) {
+if (priorityQueue->size > 0) {
+// Swap the root (highest priority) with the last element
+PriorityQueueNode temp = priorityQueue->heap[0];
+priorityQueue->heap[0] = priorityQueue->heap[--priorityQueue->size];
+priorityQueue->heap[priorityQueue->size] = temp;
+// Re-heapify to maintain the min-heap property
+heapifyDown(priorityQueue, 0);
+printf("Task with the highest priority removed from priority queue.\n");
+} else {
+printf("Priority queue is empty. Cannot dequeue.\n");
+}
+}
+void heapifyDown(PriorityQueue* priorityQueue, int index) {
+int leftChild = 2 * index + 1;
+int rightChild = 2 * index + 2;
+int smallest = index;
+if (leftChild < priorityQueue->size && priorityQueue->heap[leftChild].priority <
+priorityQueue->heap[smallest].priority) {
+smallest = leftChild;
+}
+if (rightChild < priorityQueue->size && priorityQueue->heap[rightChild].priority <
+priorityQueue->heap[smallest].priority) {
+smallest = rightChild;
+}
+if (smallest != index) {
+// Swap nodes if a child has higher priority
+PriorityQueueNode temp = priorityQueue->heap[index];
+priorityQueue->heap[index] = priorityQueue->heap[smallest];
+priorityQueue->heap[smallest] = temp;
+// Recursively heapify the affected subtree
+heapifyDown(priorityQueue, smallest);
+}
+}
+HashTable* initializeHashTable() {
+HashTable* hashTable = (HashTable*)malloc(sizeof(HashTable));
+for (int i = 0; i < 10; i++) {
+hashTable->table[i] = NULL;
+}
+return hashTable;
+}
+void addTaskToHashTable(HashTable* hashTable, char task[], int priority) {
+unsigned int index = priority % 10; // Using priority as a hash index for demonstration
+HashTableEntry* newEntry = (HashTableEntry*)malloc(sizeof(HashTableEntry));
+strcpy(newEntry->task, task);
+newEntry->priority = priority;
+newEntry->next = hashTable->table[index];
+hashTable->table[index] = newEntry;
+}
+void updatePriorityInHashTable(HashTable* hashTable, char task[], int newPriority) {
+unsigned int index = newPriority % 10; // Using new priority as a hash index for
+demonstration
+HashTableEntry* entry = hashTable->table[index];
+while (entry != NULL) {
+if (strcmp(task, entry->task) == 0) {
+entry->priority = newPriority;
+printf("Task priority updated in hash table.\n");
+return;
+}
+entry = entry->next;
+}
+printf("Task not found in hash table.\n");
+}
+void displayTasksHashTable(HashTable* hashTable) {
+for (int i = 0; i < 10; i++) {
+HashTableEntry* entry = hashTable->table[i];
+while (entry != NULL) {
+printf("Priority: %d, Task: %s\n", entry->priority, entry->task);
+entry = entry->next;
+}
+}
+}

@@ -1,0 +1,17 @@
+#define CONSTRAINT 100
+typedef struct Node Node_t;
+Node_t* innerCloneGraph(Node_t* s, Node_t** dpMem) {
+if(s==NULL){ return NULL; }
+if(dpMem[s->val-1]!=NULL){ return dpMem[s->val-1]; }
+Node_t* ss=malloc(sizeof(struct Node)); dpMem[s->val-1]=ss;
+ss->val=s->val; ss->numNeighbors=s->numNeighbors;
+if(s->numNeighbors<=0){ ss->neighbors = NULL; } else {
+ss->neighbors = malloc(s->numNeighbors*sizeof(Node_t*));
+for(int i=0; i<s->numNeighbors; i++)
+{ ss->neighbors[i] = innerCloneGraph(s->neighbors[i], dpMem); }
+}
+return ss;
+}
+Node_t* cloneGraph(Node_t* s) {
+Node_t* dpMem[CONSTRAINT]; memset(dpMem, NULL, CONSTRAINT*sizeof(Node_t*));
+return innerCloneGraph(s, dpMem);

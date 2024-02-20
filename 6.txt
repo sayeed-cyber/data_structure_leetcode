@@ -1,0 +1,36 @@
+/**
+* Definition for singly-linked list.
+* struct ListNode {
+* int val;
+* struct ListNode *next;
+* };
+*/
+int numComponents(struct ListNode* head, int* nums, int numsSize){
+int total = 0, stop = 0;
+struct ListNode *tmp = NULL, *ptr = NULL;
+int visited[numsSize], last = 0;
+memset(visited, 0, sizeof(visited));
+tmp = head;
+while(tmp != NULL)
+{
+for(int i = 0;i <numsSize; i++)
+{
+if((tmp->val == nums[i]) && visited[i] != 1)
+{
+if((ptr != NULL ) && (ptr->val == nums[last]))
+{
+total = total;
+}
+else
+{
+total += 1;
+}
+visited[i] = 1;
+last = i;
+break;
+}
+}
+ptr = tmp;
+tmp = tmp->next;
+}
+return total;

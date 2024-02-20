@@ -1,0 +1,19 @@
+int findMinFibonacciNumbers(int k) {
+long long a = 1, b = 1, temp, count = 0;
+// Find the Fibonacci numbers up to or equal to k
+while (b <= k) {
+temp = a + b;
+a = b;
+b = temp;
+}
+// Count the minimum number of Fibonacci numbers whose sum is equal to k
+while (k > 0) {
+if (a <= k) {
+k -= a;
+count++;
+}
+temp = b - a;
+b = a;
+a = temp;
+}
+return count;
